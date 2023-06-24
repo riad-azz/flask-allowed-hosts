@@ -31,7 +31,7 @@ app = Flask(__name__)
 ALLOWED_HOSTS = ['127.0.0.1:5000', 'localhost:5000']
 ```
 
-4. Apply the check_host decorator to the desired endpoint(s):
+4. Apply the `@check_host` decorator to the desired endpoint(s):
 
 ```python
 @app.route("/api")
