@@ -3,3 +3,4 @@ venv
 **/dist
 **/build
 **/flask_allowedhosts.egg-info
+**/__pycache__
