@@ -53,7 +53,7 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 ```
 
-6. Access the protected endpoint(s) using the allowed hosts. Requests from other hosts will receive a 403 Forbidden error.
+Now only the allowed hosts can access the protected endpoint(s). Requests from other hosts will receive a 403 Forbidden error.
 
 ## Contributing
 
