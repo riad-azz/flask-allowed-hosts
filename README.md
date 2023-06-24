@@ -31,8 +31,6 @@ app = Flask(__name__)
 ALLOWED_HOSTS = ['127.0.0.1:5000', 'localhost:5000']
 ```
 
-*The default value for `allowed_hosts` is an empty list, which means requests from all hosts are allowed.*
-
 4. Apply the check_host decorator to the desired endpoint(s):
 
 ```python
@@ -44,7 +42,7 @@ def greet_endpoint():
     return jsonify(greeting), 200
 ```
 
-*Replace `/api` with the actual endpoint path that requires host validation.*
+*The default value for `allowed_hosts` is an empty list, which means requests from all hosts are allowed.*
 
 5. Run the Flask application:
 
