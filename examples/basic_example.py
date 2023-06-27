@@ -3,9 +3,9 @@ from flask_allowedhosts import check_host
 
 app = Flask(__name__)
 
-ALLOWED_HOSTS = ['127.0.0.1:5000', 'localhost:5000']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-@app.route("/api")
+@app.route("/api", methods=["GET"])
 @check_host(allowed_hosts=ALLOWED_HOSTS)
 def greet_endpoint():
     name = request.args.get("name", "Friend")
@@ -14,4 +14,4 @@ def greet_endpoint():
 
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000)
+  app.run(host='0.0.0.0', port=5000, debug=True)

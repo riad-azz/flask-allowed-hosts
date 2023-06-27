@@ -28,7 +28,7 @@ app = Flask(__name__)
 3. Define the list of allowed hosts:
 
 ```python
-ALLOWED_HOSTS = ['127.0.0.1:5000', 'localhost:5000']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 ```
 
 4. Apply the `@check_host` decorator to the desired endpoint(s):
@@ -52,7 +52,7 @@ from flask_allowedhosts import check_host
 
 app = Flask(__name__)
 
-ALLOWED_HOSTS = ['127.0.0.1:5000', 'localhost:5000']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 @app.route("/api")
 @check_host(allowed_hosts=ALLOWED_HOSTS)
