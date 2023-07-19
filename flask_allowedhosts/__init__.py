@@ -1,2 +1,1 @@
-from .decorators import check_host
-from .utils import DEBUG
+from .decorators import limit_hosts

@@ -12,50 +12,23 @@ pip install flask-allowedhosts
 
 ## Getting Started
 
-1. Import the check_host decorator from flask_allowedhosts:
+To limit access to your routes using `flask-allowedhosts` follow these simple steps:
+
+1. Import the `limit_hosts` decorator from flask_allowedhosts.
+2. Define the list of allowed hosts.
+3. Apply the `@limit_hosts` decorator to the desired endpoint(s).
 
 ```python
 from flask import Flask, request, jsonify
-from flask_allowedhosts import check_host
-```
-
-2. Create a Flask application instance:
-
-```python
-app = Flask(__name__)
-```
-
-3. Define the list of allowed hosts:
-
-```python
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-```
-
-4. Apply the `@check_host` decorator to the desired endpoint(s):
-
-```python
-@app.route("/api")
-@check_host(allowed_hosts=ALLOWED_HOSTS)
-def greet_endpoint():
-    name = request.args.get("name", "Friend")
-    greeting = {"greeting": f"Hello There {name}!"}
-    return jsonify(greeting), 200
-```
-
-*The default value for `allowed_hosts` is an empty list, which means requests from all hosts are allowed.*
-
-5. Run the Flask application:
-
-```python
-from flask import Flask, request, jsonify
-from flask_allowedhosts import check_host
+from flask_allowedhosts import limit_hosts
 
 app = Flask(__name__)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-@app.route("/api")
-@check_host(allowed_hosts=ALLOWED_HOSTS)
+
+@app.route("/api/greet")
+@limit_hosts(allowed_hosts=ALLOWED_HOSTS)
 def greet_endpoint():
     name = request.args.get("name", "Friend")
     greeting = {"greeting": f"Hello There {name}!"}
@@ -63,10 +36,12 @@ def greet_endpoint():
 
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
 ```
 
-Now only the allowed hosts can access the protected endpoint(s). Requests from other hosts will receive a 403 Forbidden error.
+Now only the allowed hosts set in `ALLOWED_HOSTS` can access the protected endpoint(s). Requests from other hosts will receive a 403 Forbidden error.
+
+_The default value for `allowed_hosts` is an empty list, which means requests from all hosts are allowed._
 
 ## Contributing
 
