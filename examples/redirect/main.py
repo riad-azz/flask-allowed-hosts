@@ -3,7 +3,7 @@ from flask_allowedhosts import limit_hosts
 
 app = Flask(__name__)
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["123.123.123.123", "321.321.321.321"]
 
 
 # Redirects to `/custom-error` page if the request IP is not in the allowed hosts
@@ -22,7 +22,7 @@ def custom_error():
 
 
 @app.route("/api/greet", methods=["GET"])
-@limit_hosts(allowed_hosts=["no"], on_denied=on_denied)
+@limit_hosts(allowed_hosts=ALLOWED_HOSTS, on_denied=on_denied)
 def greet_endpoint():
     name = request.args.get("name", "Friend")
     greeting = {"greeting": f"Hello There {name}!"}

@@ -2,18 +2,16 @@
 from flask import request, abort
 
 # Other modules
+from typing import Callable
 from functools import wraps
 from flask_allowedhosts.utils import get_real_host, debug_log
 
 
-def limit_hosts(allowed_hosts: list = None):
-    if allowed_hosts is None:
-        allowed_hosts = []
-
+def limit_hosts(allowed_hosts: list = None, on_denied: Callable = None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if not allowed_hosts:
+            if allowed_hosts is None or len(allowed_hosts) == 0:
                 return func(*args, **kwargs)
 
             client_ip = request.remote_addr
@@ -38,9 +36,12 @@ def limit_hosts(allowed_hosts: list = None):
                 debug_log("Valid Client IP, request was permitted")
                 return func(*args, **kwargs)
             else:
-                # Abort request if all checks failed
-                debug_log("Invalid Client IP, request was not permitted")
-                abort(403)
+                if callable(on_denied):
+                    return on_denied(*args, **kwargs)
+                else:
+                    # Abort request if all checks failed
+                    debug_log("Invalid Client IP, request was not permitted")
+                    abort(403)
 
         return wrapper
 

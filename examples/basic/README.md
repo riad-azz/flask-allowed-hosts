@@ -7,11 +7,11 @@ The `limit_hosts` decorator is applied to the `/api/greet` endpoint, which ensur
 
 ## Usage
 
-- Start the Flask application using `python basic_example.py`.
+- Start the Flask application using `python main.py`.
 - Access the `/api/greet` endpoint using a browser or API client.
 - The `limit_hosts` decorator will validate the request host against the `allowed_hosts` list.
 - If the host is in the allowed list, the API endpoint will return a greeting with the provided name.
-- If the host is not in the allowed list, a 403 Forbidden error will be returned.
+- If the host is not in the allowed list, a json response containing the error message will be returned with status code 403.
 
 ### Attributes
 

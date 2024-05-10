@@ -26,9 +26,11 @@ app = Flask(__name__)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+def on_denied():
+    return "Unauthorized access", 401
 
 @app.route("/api/greet")
-@limit_hosts(allowed_hosts=ALLOWED_HOSTS)
+@limit_hosts(allowed_hosts=ALLOWED_HOSTS, on_denied=on_denied)
 def greet_endpoint():
     name = request.args.get("name", "Friend")
     greeting = {"greeting": f"Hello There {name}!"}
@@ -41,7 +43,11 @@ if __name__ == '__main__':
 
 Now only the allowed hosts set in `ALLOWED_HOSTS` can access the protected endpoint(s). Requests from other hosts will receive a 403 Forbidden error.
 
-_The default value for `allowed_hosts` is an empty list, which means requests from all hosts are allowed._
+### Arguments
+
+- `allowed_hosts`: List[str] : Modify this list to include the allowed hosts. The default value is an empty list `[]`, which means requests from all hosts are allowed.
+
+- `on_denied`: Callable: Modify this function to customize the behavior when a request is denied. The default is `None`, which means a 403 Forbidden error is returned.
 
 ## Contributing
 
