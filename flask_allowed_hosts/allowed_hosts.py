@@ -15,7 +15,6 @@ class AllowedHosts:
         self.debug = False
         self.on_denied = on_denied
         self.allowed_hosts = allowed_hosts
-        self.exempted_routes = []
         if app is not None:
             self.init_app(app)
 
@@ -81,10 +80,6 @@ class AllowedHosts:
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
-                if func.__name__ in self.exempted_routes:
-                    self.debug_log(f"Route {func.__name__} is exempted")
-                    return func(*args, **kwargs)
-
                 if self.is_valid_host(allowed_hosts):
                     return func(*args, **kwargs)
 
