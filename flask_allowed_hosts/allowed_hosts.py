@@ -2,9 +2,11 @@
 from flask import request, abort, Flask
 
 # Other modules
-import ipaddress
+import socket
 from functools import wraps
 from typing import List, Callable, Union
+
+LOCAL_HOST_VARIANTS = ('localhost', '127.0.0.1', '::1')
 
 
 class AllowedHosts:
@@ -17,37 +19,54 @@ class AllowedHosts:
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app: Flask):
-        if self.on_denied is None:
-            self.on_denied = app.config.get('IP_LIMITER_ON_DENIED', None)
+    def init_app(self, app: Flask, debug: bool = False):
+        self.debug = app.config.get('ALLOWED_HOSTS_DEBUG', debug)
 
         if self.allowed_hosts is None:
-            self.allowed_hosts = app.config.get('IP_LIMITER_ALLOWED_HOSTS', None)
+            self.allowed_hosts = app.config.get('ALLOWED_HOSTS', None)
 
-        self.debug = app.config.get('IP_LIMITER_DEBUG', False)
+        if self.on_denied is None:
+            self.on_denied = app.config.get('ALLOWED_HOSTS_ON_DENIED', None)
+
+    def get_hostname_ips(self, host: str) -> List[str]:
+        try:
+            host = socket.gethostbyname_ex(host)
+            self.debug_log(f"Host: {host}")
+            host_ips = host[2]
+            self.debug_log(f"Host IPs: {host_ips}")
+            return host_ips
+        except socket.gaierror:
+            return []
+
+    def is_real_hostname(self, host: str, client_ip: str) -> bool:
+        host_ips = self.get_hostname_ips(host)
+        return client_ip in host_ips
 
     @staticmethod
-    def is_ip_in_network(ip: str, network: str) -> bool:
-        try:
-            return ipaddress.ip_address(ip) in ipaddress.ip_network(network)
-        except ValueError:
-            return False
+    def is_local_connection_allowed(host: str, client_ip: str) -> bool:
+        return host in LOCAL_HOST_VARIANTS and client_ip in ('127.0.0.1', '::1', '::ffff:127.0.0.1')
 
     def debug_log(self, message: str):
         if self.debug:
-            print(f"IPLimiter: {message}")
+            print(f"AllowedHosts -> {message}")
 
     def is_valid_host(self, allowed_hosts: Union[List[str], str]) -> bool:
-        if not allowed_hosts or allowed_hosts == "*" or allowed_hosts == ["*"]:
-            self.debug_log(f"All hosts are allowed, request was permitted: {allowed_hosts}")
+        if not allowed_hosts or allowed_hosts in ("*", ["*"]):
+            self.debug_log("All hosts are allowed, request was permitted.")
             return True
 
         client_ip = request.remote_addr
         self.debug_log(f"Client IP: {client_ip}")
 
+        if isinstance(allowed_hosts, str):
+            allowed_hosts = [allowed_hosts]
+
         for host in allowed_hosts:
-            if self.is_ip_in_network(client_ip, host):
-                self.debug_log("Valid Client IP, request was permitted")
+            if self.is_local_connection_allowed(host, client_ip):
+                self.debug_log("Localhost connection permitted")
+                return True
+            elif self.is_real_hostname(host, client_ip):
+                self.debug_log("Valid hostname, request was permitted.")
                 return True
 
         self.debug_log("Invalid Client IP, request was not permitted")
