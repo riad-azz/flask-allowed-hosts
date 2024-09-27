@@ -1,6 +1,9 @@
 # Flask Allowed Hosts
 
-Flask Allowed Hosts is a Flask extension that provides host validation for API endpoints. It allows you to enforce that requests are only accepted from specific hosts, providing an additional layer of security for your Flask application.
+Flask Allowed Hosts is a Flask extension that provides host validation for API endpoints. It allows you to enforce that
+requests are only accepted from specific hosts, providing an additional layer of security for your Flask application.
+
+**Deprecated**: This package is no longer maintained. Please use `flask_allowed_hosts` instead.
 
 ## Installation
 
@@ -26,8 +29,10 @@ app = Flask(__name__)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+
 def on_denied():
     return "Unauthorized access", 401
+
 
 @app.route("/api/greet")
 @limit_hosts(allowed_hosts=ALLOWED_HOSTS, on_denied=on_denied)
@@ -41,17 +46,21 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 ```
 
-Now only the allowed hosts set in `ALLOWED_HOSTS` can access the protected endpoint(s). Requests from other hosts will receive a 403 Forbidden error.
+Now only the allowed hosts set in `ALLOWED_HOSTS` can access the protected endpoint(s). Requests from other hosts will
+receive a 403 Forbidden error.
 
 ### Arguments
 
-- `allowed_hosts`: List[str] : Modify this list to include the allowed hosts. The default value is an empty list `[]`, which means requests from all hosts are allowed.
+- `allowed_hosts`: List[str] : Modify this list to include the allowed hosts. The default value is an empty list `[]`,
+  which means requests from all hosts are allowed.
 
-- `on_denied`: Callable: Modify this function to customize the behavior when a request is denied. The default is `None`, which means a 403 Forbidden error is returned.
+- `on_denied`: Callable: Modify this function to customize the behavior when a request is denied. The default is `None`,
+  which means a 403 Forbidden error is returned.
 
 ## Contributing
 
-Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
+Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit
+a pull request.
 
 ## License
 
