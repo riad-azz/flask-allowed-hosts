@@ -4,13 +4,13 @@ long_description = open('README.md').read()
 long_description_content_type = 'text/markdown'
 
 setup(
-    name='flask-allowedhosts',
-    version='1.4.0',
-    packages=['flask_allowedhosts'],
+    name='flask-allowed-hosts',
+    version='1.0.0',
+    packages=['flask_allowed_hosts'],
     install_requires=[
         'Flask',
     ],
-    url='https://github.com/riad-azz/flask-allowedhosts',
+    url='https://github.com/riad-azz/flask-allowed-hosts',
     license='MIT',
     author='Riadh Azzoun',
     author_email='riadh.azzoun@hotmail.com',

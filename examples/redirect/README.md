@@ -1,28 +1,53 @@
+# Flask Allowed Hosts with Custom Error Page Example
 
-# Flask Allowed Hosts Example
+This project demonstrates how to use the `flask_allowed_hosts` package in a Flask application to enforce allowed hosts
+and redirect unauthorized requests to a custom error page.
 
-This example demonstrates how to use the `flask_allowedhosts` package to enforce allowed hosts for a Flask API endpoint.
-
-The `limit_hosts` decorator is applied to the `/api/greet` endpoint, which ensures that requests are only allowed from specified hosts.
+In this example, the `limit` decorator is used to restrict access to specific endpoints based on the request's IP
+address. If a request comes from an unallowed host, it is redirected to a custom error page.
 
 ## Usage
 
-- Start the Flask application using `python main.py`.
-- Access the `/api/greet` endpoint using a browser or API client.
-- The `limit_hosts` decorator will validate the request host against the `allowed_hosts` list.
-- If the host is in the allowed list, the API endpoint will return a greeting with the provided name.
-- If the host is not in the allowed list the request will be redirected to the page `/custom-error`.
+1. Install the necessary package:
+   ```bash
+   pip install flask-allowed-hosts
+   ```
 
-### Attributes
+2. Start the Flask application by running:
+   ```bash
+   python main.py
+   ```
 
-- `ALLOWED_HOSTS` (list): A list of allowed hosts in the format 'host:port'. Modify this list to include the allowed hosts.
+3. Access the following endpoints using a browser or API client.
 
-### Endpoints
+## Features
 
-- `/api/greet`: The API endpoint that requires host validation. It accepts a query parameter `name` and returns a JSON response with a greeting.
+- **Host Validation**: The `limit` decorator checks the request's host IP against a pre-configured
+  list (`ALLOWED_HOSTS`).
+- **Custom Denied Response**: Requests from unallowed hosts will be redirected to `/custom-error`.
 
-### Note
+## Endpoints
 
-- Ensure that the `flask-allowedhosts` package is installed (`pip install flask-allowedhosts`) to use the `limit_hosts` decorator.
+### `/` (GET)
 
-- The `host` parameter in `app.run()` is set to `'0.0.0.0'` to make the application externally accessible. Modify it as needed.
+- Returns a simple "Hello World!" message.
+
+### `/custom-error` (GET)
+
+- This is the custom error page where users are redirected if their IP is not in the allowed list. Displays an error
+  message: "Oops! looks like you are not allowed to access this page!"
+
+### `/api/greet` (GET)
+
+- **Host Validation**: Restricted to IP addresses in `ALLOWED_HOSTS`.
+- Accepts an optional query parameter `name`. Returns a JSON response greeting the user.
+
+### `/api/greet/override` (GET)
+
+- **Host Override**: This endpoint allows additional hosts like `localhost` and `127.0.0.1` to access it.
+- Accepts an optional query parameter `name` and returns a greeting override message.
+
+## Custom Denial Redirect
+
+If a request comes from an unallowed host, the API will redirect the user to the `/custom-error` page.
+
