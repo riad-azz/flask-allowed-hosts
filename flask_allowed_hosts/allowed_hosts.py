@@ -35,11 +35,12 @@ class AllowedHosts:
             self.debug_log(f"Host IPs: {host_ips}")
             return host_ips
         except socket.gaierror:
+            self.debug_log(f"get_hostname_ips error: {host}")
             return []
 
-    def is_real_hostname(self, host: str, client_ip: str) -> bool:
+    def is_real_hostname(self, host: str, request_ip: str) -> bool:
         host_ips = self.get_hostname_ips(host)
-        return client_ip in host_ips
+        return request_ip in host_ips
 
     @staticmethod
     def is_local_connection_allowed(host: str, client_ip: str) -> bool:
@@ -54,21 +55,21 @@ class AllowedHosts:
             self.debug_log("All hosts are allowed, request was permitted.")
             return True
 
-        client_ip = request.remote_addr
-        self.debug_log(f"Client IP: {client_ip}")
-
         if isinstance(allowed_hosts, str):
             allowed_hosts = [allowed_hosts]
 
+        request_ip = request.remote_addr
+        self.debug_log(f"Request IP: {request_ip}")
+
         for host in allowed_hosts:
-            if self.is_local_connection_allowed(host, client_ip):
+            if self.is_local_connection_allowed(host, request_ip):
                 self.debug_log("Localhost connection permitted")
                 return True
-            elif self.is_real_hostname(host, client_ip):
-                self.debug_log("Valid hostname, request was permitted.")
+            elif self.is_real_hostname(host, request_ip):
+                self.debug_log("Valid Host, request was permitted.")
                 return True
 
-        self.debug_log("Invalid Client IP, request was not permitted")
+        self.debug_log("Invalid Host, request was not permitted")
         return False
 
     def limit(self, allowed_hosts: Union[List[str], str] = None, on_denied: Callable = None):
