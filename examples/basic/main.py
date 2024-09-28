@@ -11,6 +11,7 @@ def on_denied():
 
 
 app = Flask(__name__)
+
 allowed_hosts = AllowedHosts(app, allowed_hosts=ALLOWED_HOSTS, on_denied=on_denied)
 
 
@@ -27,11 +28,11 @@ def greet_endpoint():
     return jsonify(greeting), 200
 
 
-@app.route("/api/greet/override", methods=["GET"])
+@app.route("/api/greet/local", methods=["GET"])
 @allowed_hosts.limit(allowed_hosts=["127.0.0.1", "localhost"])
-def greet_override_endpoint():
+def local_greet_endpoint():
     name = request.args.get("name", "Friend")
-    greeting = {"greeting override": f"Hello There {name}!"}
+    greeting = {"local greeting": f"Hello There {name}!"}
     return jsonify(greeting), 200
 
 

@@ -1,26 +1,27 @@
-from flask import Flask, request, jsonify, redirect
+from flask import Flask, request, jsonify
 from flask_allowed_hosts import AllowedHosts
 
 ALLOWED_HOSTS = ["123.123.123.123", "321.321.321.321"]
 
 
-# Redirects to `/custom-error` page if the request IP is not in the allowed hosts
+# Returns a json response if the request IP is not in the allowed hosts
 def on_denied():
-    return redirect("/custom-error")
+    error = {"error": "Oops! looks like you are not allowed to access this page!"}
+    return jsonify(error), 403
 
 
 app = Flask(__name__)
-allowed_hosts = AllowedHosts(app, allowed_hosts=ALLOWED_HOSTS, on_denied=on_denied)
+app.config['ALLOWED_HOSTS'] = ALLOWED_HOSTS
+app.config['ALLOWED_HOSTS_ON_DENIED'] = on_denied
+# app.config['ALLOWED_HOSTS_DEBUG'] = on_denied # To enable debug mode
+
+allowed_hosts = AllowedHosts()
+allowed_hosts.init_app(app)
 
 
 @app.route("/", methods=["GET"])
 def home_page():
     return "Hello World!"
-
-
-@app.route("/custom-error", methods=["GET"])
-def custom_error():
-    return "Oops! looks like you are not allowed to access this page!"
 
 
 @app.route("/api/greet", methods=["GET"])

@@ -1,8 +1,8 @@
-# Flask Allowed Hosts - Custom Error Page Example
+# Flask Allowed Hosts - App Configs Example
 
-This project demonstrates how to use the `flask_allowed_hosts` package in a Flask application to enforce allowed hosts and redirect unauthorized requests to a custom error page.
+This project demonstrates how to enforce allowed hosts in a Flask application using the `flask_allowed_hosts` package.
 
-In this example, the `limit` decorator is used to restrict access to specific endpoints based on the request's IP address. If a request comes from an unallowed host, it is redirected to a custom error page.
+In this example, the `limit` decorator is used to restrict access to specific endpoints based on the request's IP address. Hosts that are not on the allowed list will receive a custom error message.
 
 ## Usage
 
@@ -21,17 +21,13 @@ In this example, the `limit` decorator is used to restrict access to specific en
 ## Features
 
 - **Host Validation**: The `limit` decorator checks the request's host IP against a pre-configured list (`ALLOWED_HOSTS`).
-- **Custom Denied Response**: Requests from unallowed hosts will be redirected to `/custom-error`.
+- **Custom Denied Response**: Requests from unallowed hosts will receive a 403 error with a custom JSON message.
 
 ## Endpoints
 
 ### `/` (GET)
 
 - Returns a simple "Hello World!" message.
-
-### `/custom-error` (GET)
-
-- This is the custom error page where users are redirected if their IP is not in the allowed list. Displays an error message: "Oops! looks like you are not allowed to access this page!"
 
 ### `/api/greet` (GET)
 
@@ -43,6 +39,12 @@ In this example, the `limit` decorator is used to restrict access to specific en
 - **Host Override**: This endpoint overrides the `ALLOWED_HOSTS` list and allows only `localhost` and `127.0.0.1` to access it.
 - Accepts an optional query parameter `name` and returns a greeting override message.
 
-## Custom Denial Redirect
+## Custom Denial Message
 
-If a request comes from an unallowed host, the API will redirect the user to the `/custom-error` page.
+If a request comes from an unallowed host, the API will return a JSON response:
+
+```json
+{
+  "error": "Oops! looks like you are not allowed to access this page!"
+}
+```
