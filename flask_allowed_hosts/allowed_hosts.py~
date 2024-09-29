@@ -1,5 +1,5 @@
 # Flask modules
-from flask import abort, Flask
+from flask import abort, Flask, request
 
 # Other modules
 from functools import wraps

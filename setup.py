@@ -5,7 +5,7 @@ long_description_content_type = 'text/markdown'
 
 setup(
     name='flask-allowed-hosts',
-    version='1.0.4',
+    version='1.1.0',
     packages=['flask_allowed_hosts'],
     install_requires=[
         'Flask',
@@ -14,7 +14,7 @@ setup(
     license='MIT',
     author='Riadh Azzoun',
     author_email='riadh.azzoun@hotmail.com',
-    description='A Flask basic to limit access to your routes by using allowed hosts.',
+    description='A Flask extension to limit access to your routes by using allowed hostnames and IP addresses.',
     long_description=long_description,
     long_description_content_type=long_description_content_type,
     keywords=["flask", "allowed hosts", "web development", "security", "flask extension", "ip validation",

@@ -141,7 +141,7 @@ def greet_endpoint():
 ```
 
 The `@limit_hosts` decorator can be used directly on route functions without needing to initialize the `AllowedHosts`
-class. It provides the same hostname/IP address restriction functionality but on a per-route basis.
+class. It provides the same IP/hostname restriction functionality but on a per-route basis.
 
 ### More Examples
 
