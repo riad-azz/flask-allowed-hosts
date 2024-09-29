@@ -1,17 +1,14 @@
 # Flask Allowed Hosts
 
-Flask Allowed Hosts is a simple and flexible extension for Flask that allows you to restrict access to your application
-based on the incoming request hostname/IP address. This extension provides an easy way to implement hostname/IP based
-access
-control in your Flask applications.
+This extension provides a way to restrict access to your Flask application based on the incoming request's hostname or
+IP address.
 
 ## Features
 
+- Restrict access by hostname/IP address.
 - Per-route configuration options.
-- Customizable denied access behavior.
-- Restrict access to your Flask app based on hostnames/IP addresses.
-- Legacy decorator for standalone use or if you prefer a decorator-based approach without initializing
-  the `AllowedHosts` class.
+- Customize denied access behavior.
+- Two usage options: class-based or decorator-based.
 
 ## Installation
 
@@ -21,14 +18,19 @@ Install the package using pip:
 pip install flask-allowed-hosts
 ```
 
-## Extension Usage
+## Usage
 
-### Basic Setup
+### Class-Based Usage
 
-Here's a basic example of how to use the Flask Allowed Hosts extension:
+1. Initialize the `AllowedHosts` class.
+2. Define allowed hosts (optional).
+3. Define a function for denied access behavior (optional).
+4. Apply access control to routes using `@allowed_hosts.limit()` decorator (optional).
+
+#### Example:
 
 ```python
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, abort
 from flask_allowed_hosts import AllowedHosts
 
 app = Flask(__name__)
@@ -45,18 +47,25 @@ allowed_hosts = AllowedHosts(app, allowed_hosts=ALLOWED_HOSTS, on_denied=custom_
 
 
 # Allows all incoming requests
-@app.route("/api/hello", methods=["GET"])
-def hello_world():
-    data = {"message": "Hello, World!"}
+@app.route("/api/public", methods=["GET"])
+def public_endpoint():
+    data = {"message": "This is public!"}
     return jsonify(data), 200
 
 
 # Only allows incoming requests from "93.184.215.14" and "api.example.com"
-@app.route("/api/greet", methods=["GET"])
+@app.route("/api/private", methods=["GET"])
 @allowed_hosts.limit()
-def greet_endpoint():
-    name = request.args.get("name", "Friend")
-    data = {"message": f"Hello There {name}!"}
+def private_endpoint():
+    data = {"message": "This is private!"}
+    return jsonify(data), 200
+
+
+# We can override the allowed_hosts list and the on_denied function for each route
+@app.route("/api/private/secret", methods=["GET"])
+@allowed_hosts.limit(allowed_hosts=["127.0.0.1"], on_denied=lambda: abort(404))
+def secret_private_endpoint():
+    data = {"message": "This is very private!"}
     return jsonify(data), 200
 
 
@@ -64,53 +73,15 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 ```
 
-### Per-Route Configuration
+### Decorator-Based Usage (Legacy)
 
-You can also override the `allowed_hosts` or `on_denied` configuration for specific views:
+**Warning**: This approach might cause unexpected behavior when combined with the class-based usage.
 
-```python
-from flask import Flask, request, jsonify, abort
-from flask_allowed_hosts import AllowedHosts
+1. Define allowed hosts (optional).
+2. Define a function for denied access behavior (optional).
+3. Apply access control to routes using `@limit_hosts` decorator.
 
-app = Flask(__name__)
-
-ALLOWED_HOSTS = ["93.184.215.14", "api.example.com"]
-
-
-def custom_on_denied():
-    error = {"error": "Oops! Looks like you are not allowed to access this page!"}
-    return jsonify(error), 403
-
-
-allowed_hosts = AllowedHosts(app, allowed_hosts=ALLOWED_HOSTS, on_denied=custom_on_denied)
-
-
-# Only allows incoming requests from "93.184.215.14" and "api.example.com"
-@app.route("/api/hello", methods=["GET"])
-@allowed_hosts.limit()
-def hello_world():
-    data = {"message": "Hello, World!"}
-    return jsonify(data), 200
-
-
-# Only allows incoming requests from "127.0.0.1" and "localhost" 
-# and throws a 503 Service Unavailable for all other requests 
-@app.route("/api/greet", methods=["GET"])
-@allowed_hosts.limit(allowed_hosts=["127.0.0.1", "localhost"], on_denied=lambda: abort(503))
-def greet_endpoint():
-    name = request.args.get("name", "Friend")
-    data = {"message": f"Hello There {name}!"}
-    return jsonify(data), 200
-```
-
-### Legacy Decorator
-
-> [!WARNING]
-> Using the `@limit_hosts` legacy decorator in combination with the `AllowedHosts` class might cause unexpected
-> behavior.
-
-For standalone use or if you prefer a decorator-based approach without initializing the `AllowedHosts` class, you can
-use the `@limit_hosts` decorator:
+#### Example:
 
 ```python
 from flask import Flask, jsonify
@@ -127,21 +98,18 @@ def custom_on_denied():
 
 
 # Allows all incoming requests
-@app.route("/api/hello", methods=["GET"])
-def hello_world():
-    data = {"message": "Hello, World!"}
+@app.route("/api/public", methods=["GET"])
+def public_endpoint():
+    data = {"message": "This is public!"}
     return jsonify(data), 200
 
 
 # Only allows incoming requests from "93.184.215.14" and "api.example.com"
-@app.route("/api/greet", methods=["GET"])
+@app.route("/api/private", methods=["GET"])
 @limit_hosts(allowed_hosts=ALLOWED_HOSTS, on_denied=custom_on_denied)
-def greet_endpoint():
-    return jsonify({"message": "This is a legacy endpoint"}), 200
+def private_endpoint():
+    return jsonify({"message": "This is private!"}), 200
 ```
-
-The `@limit_hosts` decorator can be used directly on route functions without needing to initialize the `AllowedHosts`
-class. It provides the same hostname/IP address restriction functionality but on a per-route basis.
 
 ### More Examples
 
@@ -152,57 +120,20 @@ the [examples directory](https://github.com/riad-azz/flask-allowed-hosts/tree/ma
 
 ### Initialization Parameters
 
-When initializing the `AllowedHosts` class, you can provide the following parameters:
-
-- `app` (optional): The Flask application instance. If not provided, you'll need to call `allowed_hosts.init_app(app)`
-  later.
-- `allowed_hosts` (optional): A list of allowed IP addresses/hostnames, also can be set to `"*"` or `None` to allow all
-  incoming requests. Default is `None`.
-- `on_denied` (optional): A callable that will be invoked when access is denied. Default is `None`.
-
-Example:
-
-```python
-def custom_denied_handler():
-    error = {"error": "Oops! Looks like you are not allowed to access this page!"}
-    return jsonify(error), 403
-
-
-allowed_hosts = AllowedHosts(
-    app,
-    allowed_hosts=["93.184.215.14", "api.example.com"],
-    on_denied=custom_denied_handler,
-)
-```
-
-As for the `@allowed_hosts.limit` or `@limit_hosts` decorators, you can provide the following parameters to override any
-previously provided values:
-
-- `allowed_hosts` (optional): A list of allowed IP addresses/hostnames, also can be set to `"*"` or `None` to allow all
-  hosts. Default is `None`.
-- `on_denied` (optional): A callable that will be invoked when access is denied. Default is `None`.
+- `app`: The Flask application instance (optional).
+- `allowed_hosts`: List of allowed hosts (optional, defaults to `None` which allows all hosts).
+- `on_denied`: Function for denied access behavior (optional).
 
 ### Flask Config and Environment Variables
 
 #### Flask Configuration
 
-The extension also respects the following Flask configuration variables:
+The extension respects these configurations:
 
-- `ALLOWED_HOSTS`: A list of allowed IP addresses or hostnames. This is used if `allowed_hosts` is not provided during
-  initialization.
-- `ALLOWED_HOSTS_ON_DENIED`: A callable to be used when access is denied. This is used if `on_denied` is not provided
-  during initialization.
+- `ALLOWED_HOSTS`: List of allowed hosts in Flask config.
+- `ALLOWED_HOSTS_ON_DENIED`: Function for denied access behavior in Flask config.
 
-You can set these in your Flask config:
-
-```python
-app.config['ALLOWED_HOSTS'] = ["93.184.215.14", "api.example.com"]
-app.config['ALLOWED_HOSTS_ON_DENIED'] = custom_denied_handler
-```
-
-> [!IMPORTANT]
-> If `allowed_hosts` and `on_denied` are provided during initialization they will override the values
-> of the app config.
+**Precedence**: Values provided during initialization override Flask config values.
 
 #### Environment Variables
 
