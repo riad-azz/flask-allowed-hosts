@@ -5,7 +5,7 @@ from typing import List, Union, Callable, Any
 
 from flask import request
 
-DEBUG = os.environ.get("ALLOWED_HOSTS_DEBUG", "False") == "False"
+DEBUG = os.environ.get("ALLOWED_HOSTS_DEBUG", "False") != "False"
 LOCAL_HOST_VARIANTS = ('localhost', '127.0.0.1', '::1')
 
 
