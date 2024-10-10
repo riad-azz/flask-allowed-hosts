@@ -1,61 +1,62 @@
-import os
-import socket
-
-from typing import List, Union
-
+# Flask modules
 from flask import request
 
-DEBUG = os.environ.get("ALLOWED_HOSTS_DEBUG", "False") == "True"
-LOCAL_HOST_VARIANTS = ('localhost', '127.0.0.1', '::1')
 
+# Python modules
+import re
+import socket
+import ipaddress
+from typing import List
 
-def debug_log(message: str) -> None:
-    if DEBUG:
-        print(f"Flask Allowed Hosts -> {message}")
+# Local modules
+from flask_allowed_hosts.logger import AllowedHostsLogger
 
 
 def get_remote_address() -> str:
     return request.remote_addr or "127.0.0.1"
 
 
-def get_hostname_ips(host: str) -> List[str]:
+def get_host_ips(host: str) -> List[str]:
     try:
         host = socket.gethostbyname_ex(host)
-        debug_log(f"Host: {host}")
+        AllowedHostsLogger.info(f"Host: {host}")
         host_ips = host[2]
-        debug_log(f"Host IPs: {host_ips}")
+        AllowedHostsLogger.info(f"Host IPs: {host_ips}")
         return host_ips
     except socket.gaierror:
-        debug_log(f"get_hostname_ips error: {host}")
+        AllowedHostsLogger.error(f"get_host_ips error: {host}")
         return []
 
 
-def is_real_hostname(host: str, request_ip: str) -> bool:
-    host_ips = get_hostname_ips(host)
-    return request_ip in host_ips
+def is_local_host(host: str) -> bool:
+    try:
+        host_ip = socket.gethostbyname(host)
+        return ipaddress.ip_address(host_ip).is_loopback
+    except socket.gaierror:
+        return False
 
 
-def is_local_connection_allowed(host: str, client_ip: str) -> bool:
-    return host in LOCAL_HOST_VARIANTS and client_ip in ('127.0.0.1', '::1', '::ffff:127.0.0.1')
+def is_valid_cidr_network(address: str, strict: bool = False) -> bool:
+    # Regex pattern match CIDR networks
+    pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/(?:[0-9]|[1-2][0-9]|3[0-2]))'
+    regex = re.compile(pattern)
 
+    if not regex.fullmatch(address):
+        return False
 
-def is_valid_host(request_ip: str, allowed_hosts: Union[List[str], str]) -> bool:
-    if not allowed_hosts or allowed_hosts in ("*", ["*"]):
-        debug_log("All hosts are allowed, request was permitted.")
+    try:
+        ipaddress.ip_network(address, strict=strict)
         return True
+    except ValueError:
+        AllowedHostsLogger.error(f"is_valid_cidr_network error: {address}")
+        return False
 
-    if isinstance(allowed_hosts, str):
-        allowed_hosts = [allowed_hosts]
 
-    debug_log(f"Request IP: {request_ip}")
+def get_host_type(host: str) -> str:
+    if is_local_host(host):
+        return "localhost"
 
-    for host in allowed_hosts:
-        if is_local_connection_allowed(host, request_ip):
-            debug_log("Localhost connection permitted")
-            return True
-        elif is_real_hostname(host, request_ip):
-            debug_log("Valid Host, request was permitted.")
-            return True
+    if is_valid_cidr_network(host):
+        return "network"
 
-    debug_log("Invalid Host, request was not permitted")
-    return False
+    return "host"

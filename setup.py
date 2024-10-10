@@ -5,7 +5,7 @@ long_description_content_type = 'text/markdown'
 
 setup(
     name='flask-allowed-hosts',
-    version='1.1.2',
+    version='1.2.0',
     packages=['flask_allowed_hosts'],
     install_requires=[
         'Flask',

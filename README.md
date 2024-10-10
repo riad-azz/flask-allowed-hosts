@@ -1,14 +1,14 @@
 # Flask Allowed Hosts
 
 This extension provides a way to restrict access to your Flask application based on the incoming request's hostname or
-IP address.
+IP address or IP address range (network).
 
 ## Features
 
-- Restrict access by hostname/IP address.
 - Per-route configuration options.
 - Customize denied access behavior.
 - Two usage options: class-based or decorator-based.
+- Restrict access by hostname, IP address or IP address range (network).
 
 ## Installation
 
